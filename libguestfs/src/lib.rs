@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::os::unix::prelude::OsStrExt;
 use std::path::Path;
 
@@ -37,29 +37,110 @@ impl GuestFS {
 
     pub fn list_partitions(&self) -> Result<Vec<String>> {
         let mut partitions = Vec::new();
-        // let mut err = 0;
-        let mut partitions_ptr = unsafe { guestfs_list_partitions(self.handle) };
-        // if err != 0 {
-        //     return Err(eyre!("error listing partitions"));
-        // }
-        while !partitions_ptr.is_null() {
-            let partition = unsafe { CString::from_raw(*partitions_ptr) };
-            partitions.push(partition.to_string_lossy().to_string());
-            partitions_ptr = unsafe { partitions_ptr.offset(1) };
+        let partitions_ptr = unsafe { guestfs_list_partitions(self.handle) };
+        let string_count = self.count_strings(partitions_ptr as *const *const i8);
+        println!("string count: {}", string_count);
+
+        let parts = unsafe { std::slice::from_raw_parts(partitions_ptr, string_count) };
+
+        // parts to vec of strings
+        for part in parts {
+            let part = unsafe { CStr::from_ptr(*part) };
+            let part = part.to_str()?;
+            partitions.push(part.to_string());
         }
+
         Ok(partitions)
     }
 
-    pub fn set_error_handler(
-        &self,
-        eh: unsafe extern "C" fn(*mut guestfs_h, *mut ::std::ffi::c_void, *const i8),
-    ) {
-        unsafe { guestfs_set_error_handler(self.handle, Some(eh), std::ptr::null_mut()) };
+    pub fn list_filesystems(&self) -> Result<Vec<String>> {
+        let mut filesystems = Vec::new();
+        let filesystems_ptr = unsafe { guestfs_list_filesystems(self.handle) };
+        let string_count = self.count_strings(filesystems_ptr as *const *const i8);
+        let guestfs_filesystems =
+            unsafe { std::slice::from_raw_parts(filesystems_ptr, string_count) };
+
+        for filesystem in guestfs_filesystems {
+            let filesystem = unsafe { CStr::from_ptr(*filesystem) };
+            let filesystem = filesystem.to_str().unwrap();
+            filesystems.push(filesystem.to_string());
+        }
+
+        Ok(filesystems)
+    }
+
+    fn count_strings(&self, pointer: *const *const i8) -> usize {
+        let mut count = 0;
+        let mut pointer = pointer;
+        while !pointer.is_null() {
+            if (unsafe { *pointer }).is_null() {
+                break;
+            }
+            count += 1;
+            pointer = unsafe { pointer.add(1) };
+        }
+        count
     }
 }
 
 impl Drop for GuestFS {
     fn drop(&mut self) {
+        println!("dropping!");
         unsafe { guestfs_close(self.handle) };
+        println!("dropped!");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1 cargo test
+    use super::*;
+
+    use eyre::Result;
+
+    #[test]
+    fn test_list_partitions() -> Result<()> {
+        // TODO: Make this have
+        let mut g = GuestFS::new();
+        let path = Path::new("../fixtures/ext4.img").canonicalize()?;
+        println!("add drive");
+        g.add_drive(path)?;
+        println!("launch");
+        g.launch().unwrap();
+        println!("list");
+        let partitions = g.list_partitions()?;
+        println!("assert");
+        assert_eq!(0, partitions.len());
+        Ok(())
+    }
+
+    #[test]
+    fn test_list_filesystems() -> Result<()> {
+        let mut g = GuestFS::new();
+        let path = Path::new("../fixtures/ext4.img").canonicalize()?;
+        g.add_drive(path)?;
+        g.launch().unwrap();
+        let filesystems = g.list_filesystems()?;
+        dbg!(&filesystems);
+        assert_eq!(2, filesystems.len());
+        assert_eq!("/dev/sda", filesystems[0]);
+        assert_eq!("ext4", filesystems[1]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_list_filesystems_hello_world() -> Result<()> {
+        let mut g = GuestFS::new();
+        let path = Path::new("../fixtures/hello-world.ext4").canonicalize()?;
+        g.add_drive(path)?;
+        g.launch().unwrap();
+        let filesystems = g.list_filesystems()?;
+        dbg!(&filesystems);
+        assert_eq!(2, filesystems.len());
+        assert_eq!("/dev/sda", filesystems[0]);
+        assert_eq!("ext4", filesystems[1]);
+
+        Ok(())
     }
 }
