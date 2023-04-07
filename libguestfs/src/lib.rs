@@ -43,12 +43,14 @@ impl GuestFS {
 
         let parts = unsafe { std::slice::from_raw_parts(partitions_ptr, string_count) };
 
-        // parts to vec of strings
-        for part in parts {
-            let part = unsafe { CStr::from_ptr(*part) };
+        for ptr in parts {
+            let part = unsafe { CStr::from_ptr(*ptr) };
             let part = part.to_str()?;
             partitions.push(part.to_string());
+            self.free(*ptr);
         }
+
+        self.free(partitions_ptr as *mut i8);
 
         Ok(partitions)
     }
@@ -60,11 +62,14 @@ impl GuestFS {
         let guestfs_filesystems =
             unsafe { std::slice::from_raw_parts(filesystems_ptr, string_count) };
 
-        for filesystem in guestfs_filesystems {
-            let filesystem = unsafe { CStr::from_ptr(*filesystem) };
+        for ptr in guestfs_filesystems {
+            let filesystem = unsafe { CStr::from_ptr(*ptr) };
             let filesystem = filesystem.to_str().unwrap();
             filesystems.push(filesystem.to_string());
+            self.free(*ptr);
         }
+
+        self.free(filesystems_ptr as *mut i8);
 
         Ok(filesystems)
     }
@@ -80,6 +85,19 @@ impl GuestFS {
             pointer = unsafe { pointer.add(1) };
         }
         count
+    }
+
+    fn free(&self, pointer: *mut i8) {
+        unsafe {
+            std::ptr::drop_in_place(pointer);
+            std::alloc::dealloc(
+                pointer as *mut u8,
+                std::alloc::Layout::from_size_align_unchecked(
+                    std::mem::size_of::<i8>(),
+                    std::mem::align_of::<i8>(),
+                ),
+            );
+        }
     }
 }
 
