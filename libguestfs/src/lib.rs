@@ -201,6 +201,21 @@ impl GuestFS {
         Ok(filesystems)
     }
 
+    // int guestfs_mke2fs_argv (guestfs_h *g, const char *device, const struct guestfs_mke2fs_argv *optargs);
+    pub fn mke2fs_argv<P: AsRef<Path>>(
+        &self,
+        device: P,
+        optargs: &libguestfs_sys::guestfs_mke2fs_argv,
+    ) -> Result<()> {
+        let device = Self::path_to_cstring_guest(device)?;
+        let out = unsafe { guestfs_mke2fs_argv(self.handle, device.as_ptr(), optargs) };
+        if out == 0 {
+            Ok(())
+        } else {
+            self.check_error()
+        }
+    }
+
     pub fn mount<P: AsRef<Path>, Q: AsRef<Path>>(&self, mountable: P, mountpoint: Q) -> Result<()> {
         let mountable = Self::path_to_cstring_guest(mountable)?;
         let mountpoint = Self::path_to_cstring_guest(mountpoint)?;

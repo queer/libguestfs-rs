@@ -1,3 +1,91 @@
 # libguestfs-rs
 
 `cargo test -- --test-threads=1`
+
+## features
+
+- [ ] `guestfs_acl_*`
+- [ ] `guestfs_add_cdrom`
+- [ ] `guestfs_add_domain_*`
+- [x] `guestfs_add_drive`
+- [ ] `guestfs_add_drive_*`
+- [ ] `guestfs_add_libvirt_dom_*`
+- [ ] `guestfs_aug_*`
+- [ ] `guestfs_available`
+- [x] `guestfs_available_all_groups`
+- [x] `guestfs_base64_*`
+- [ ] `guestfs_blk*`
+- [x] `guestfs_blockdev_getro`
+- [x] `guestfs_blockdev_getsize64`
+- [x] `guestfs_blockdev_rereadpt`
+- [x] `guestfs_blockdev_setro`
+- [x] `guestfs_blockdev_setrw`
+- [ ] `guestfs_blockdev_*`
+- [ ] `guestfs_btrfs_*`
+- [ ] `guestfs_checksum*`
+- [ ] `guestfs_chmod`
+- [ ] `guestfs_chown`
+- [ ] `guestfs_command`
+- [ ] `guestfs_copy_*`
+- [ ] `guestfs_cp*`
+- [ ] `guestfs_cryptsetup_*`
+- [ ] `guestfs_dd`
+- [ ] `guestfs_device_*`
+- [ ] `guestfs_df*`
+- [ ] `guestfs_disk_*`
+- [ ] `guestfs_download*`
+- [ ] `guestfs_e2fsck*`
+- [ ] `guestfs_extlinux`
+- [ ] `guestfs_file*`
+- [ ] `guestfs_get_*`
+- [ ] `guestfs_glob_*`
+- [ ] `guestfs_grep*`
+- [ ] `guestfs_hivex_*`
+- [ ] `guestfs_initrd_*`
+- [ ] `guestfs_inotify_*`
+- [ ] `guestfs_inspect_*`
+- [ ] `guestfs_is_*`
+- [ ] `guestfs_iso*`
+- [ ] `guestfs_journal_*`
+- [x] `guestfs_launch`
+- [ ] `guestfs_ldmtool_*`
+- [x] `guestfs_list_filesystems`
+- [x] `guestfs_list_partitions`
+- [ ] `guestfs_list_*`
+- [ ] `guestfs_luks_*`
+- [ ] `guestfs_lvm_*`
+- [ ] `guestfs_md_*`
+- [ ] `guestfs_mkdir*`
+- [ ] `guestfs_mke2fs*`
+- [ ] `guestfs_mkfs*`
+- [ ] `guestfs_mksquashfs*`
+- [ ] `guestfs_mkswap*`
+- [ ] `guestfs_mktemp*`
+- [x] `guestfs_mount`
+- [ ] `guestfs_mount*`
+- [ ] `guestfs_ntfs*`
+- [ ] `guestfs_parse_*`
+- [ ] `guestfs_part_*`
+- [ ] `guestfs_pv*`
+- [ ] `guestfs_read*`
+- [ ] `guestfs_remove_drive`
+- [ ] `guestfs_rm*`
+- [ ] `guestfs_rsync*`
+- [ ] `guestfs_scrub_*`
+- [ ] `guestfs_selinux_*`
+- [ ] `guestfs_set_*`
+- [x] `guestfs_statns`
+- [ ] `guestfs_stat*`
+- [ ] `guestfs_swapoff*`
+- [ ] `guestfs_swapon*`
+- [ ] `guestfs_syslinux*`
+- [ ] `guestfs_tar_*`
+- [x] `guestfs_touch`
+- [ ] `guestfs_tune2fs*`
+- [ ] `guestfs_umask`
+- [ ] `guestfs_umount*`
+- [ ] `guestfs_vfs_*`
+- [ ] `guestfs_vg*`
+- [ ] `guestfs_xfs_*`
+- [ ] `guestfs_yara_*`
+- [ ] `guestfs_zero*`
